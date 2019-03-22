@@ -1,0 +1,32 @@
+Calcul
+
++ Calcul() : void
++ Calcul(int, rowvec) : void
++ calculPolynomeHermite() : mat
++ getN() : int
++ setN(int) : void
++ setZ(rowvec z) : void
++ getZ() : rowvec
+
+
+DataInterface
+
+inputFileName : string
+outputFileName : string
+delimiter : string
+
++ DataInterface(string input = "../resources/in.csv", string output = "../resources/out.csv", string delim = ",") : void
++ read(int&) : rowvec
++ write(rowvec, mat) : void
++ getInputFileName() : string
++ getOutputFileName() : string
++ getDelimiter() : string
++ setInputFileName(string input) : void
++ setOutputFileName(string output) : void
++ setDelimiter(string delim) : void
+
+
+
+Miscellaneous
+
++ factorial(int n) : int

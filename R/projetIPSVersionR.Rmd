@@ -1,0 +1,104 @@
+---
+title: "Projet IPS"
+author: "Mohamed Sneiba HAMOUD"
+date: "10/2/2018"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## R Markdown
+
+In this project, we will compute the solutions of the $\color{blue}{\text{1D quantum harmonic oscillator}}$  and we will check some of its properties. 
+
+#### Quantum Harmonic Oscillator
+##### Schrodinger equation :
+                  
+$$\hat{H}(z)\Psi(z) = E_n\Psi_n(z)$$
+
+##### Resulting 1D-HO Schrodinger equation
+
+$$(\frac {\hat{p}^2(z)}{2m} + \frac {1}{2}m\omega^2\hat{z}^2)\Psi_n = E_n\Psi_n$$
+
+##### Solutions:
+The analytic solutions is :
+$$ \Psi_n(z) = \frac {1}{\sqrt{2^nn!}} (\frac {m\omega}{\pi\hbar})^\frac {1}{4} e^{-\frac {m\omega z^2}{2\hbar} }H_n(\sqrt{\frac {m\omega}{\hbar}}.z)$$
+
+To simplify we will take the constants $m$, $\hbar$ and $\omega$ equal to 1
+
+First we need to initialize the parameters.
+```{r}
+  n = 5
+  z = -100:100
+```
+
+
+We will have the compute the Hermite polynomial $H_n$ using the recurrence formula:
+$$H_0 (z) = 1$$
+$$H_1 (z) = 2z$$
+$$\forall n \geqslant 1 , H_{n+1}(z) = 2zH_n(z) - 2nH_{n-1}(z)$$
+
+```{r}
+  H = matrix(nrow=length(z),ncol=n)
+  H[,1] = 1
+  H[,2] = 2*z
+  for (i in 3:n) {
+    H[,i] = 2*z*H[,i-1] - 2*(i-1)*H[,i-2]
+  }
+```
+
+Computations of some terms in the Wave function
+the variable t2 represents $(\frac {1}{\pi})^\frac {1}{4}$ and the zcarre represents the $z^2$ and exp represents $e^{-\frac{m\omega z^2}{2\hbar}}$
+```{r}
+  t2 = (1/pi)^0.25
+  zcarre = z*z;
+  exp = exp((-1*zcarre)/2)
+```
+
+Initialization of the $\Psi$ matrix
+```{r}
+  W = matrix(nrow=length(z), ncol=n)
+```
+
+Loop for each $n$ and compute the $\Psi_n$.
+
+```{r}
+  for (i in 1:n) {
+    first_term = 1/sqrt((2^(i-1))*factorial(i-1))
+    W[,i] = first_term * t2 * exp * H[,i]
+  }
+```
+
+We show the data in the $\Psi$ matrix
+
+```{r}
+  W
+```
+
+It's almost impossible to get any sense out of this data so we will plot the matrix and visualize the data.
+
+```{r}
+  data = read.csv('../resources/out.csv')
+  H = data[2:length(data)]
+  z = data[1]
+```
+
+```{r}
+  x = seq(-100, 100, 20)
+  y = x^2
+  matplot(z, H[,3], type="o", col="black", lwd = 3,xlim = c(-4,4), ylim = c(-1.5, 1.5))
+  abline(h=0)
+  abline(v=0)
+  colors=c("#e6194B", "#3cb44b", "#4363d8", "orange", "brown");
+  
+  for (i in 2:ncol(H)) {
+    lines(z, H[,i], type = "o", col="red", lwd = 3,ylim = c(-length(z), length(z)))
+  }
+  
+  legend("topright", legend=c("W1", "W2", "W3", "W4", "W5"), col=colors, lty=1:2, cex=0.8)
+```
+

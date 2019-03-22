@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Projet IPS</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="core/fonts/mono.css"> 
+    <link rel="stylesheet" type="text/css" href="core/css/animate.css"> 
+    <link rel="stylesheet" type="text/css" href="core/css/cinescript.css"> 
+    <link rel="stylesheet" type="text/css" href="core/css/style_core.css"> 
+    <link rel="stylesheet" type="text/css" href="core/css/mermaid.css"> 
+    <link rel="stylesheet" type="text/css" href="core/css/gitgraph.css"> 
+    <link rel="stylesheet" type="text/css" href="core/css/style_ensiie.css"> 
+  </head>
+  <body>
+    <textarea id="source" readonly>
+layout: true
+class: animated fadeIn middle numbers
+
+
+.footnote[
+ENSIIE - 2018
+]
+
+---
+
+#Introduction to Scientific Programming
+<center>
+.title[
+IPS-PROD Project presentation - ENSIIE]
+
+<br/>
+.subtitle[
+Hamoud Mohamed Sneiba
+]
+</center>
+---
+
+#Project Description
+
+.mermaid.fshadow[
+    graph LR
+    A("Week #1<br/>Initialization") --> B
+    B("Week #2<br/>Project") --> C
+    C("Week #3<br/>Project") --> D
+    D("Week #4<br/>Project") --> E
+    E("Week #5<br/>Project") --> F("Week #6<br/>Presentation")
+    style A fill:#090
+    style B fill:#090
+    style C fill:#090
+    style D fill:#090
+    style E fill:#090
+    <!-- style F fill:#090 -->
+]
+
+
+## Summary
+During this 6-week long project, we calculated the local density of a nuclear system and we plotted both in 2D and 3D.
+
+.vspace[]
+
+## Nuclear local density
+Definition:
+`$$\rho(\mathbf{r})\equiv \sum_a \sum_b \rho_{ab}\psi_a(\mathbf{r})\psi^*_b(\mathbf{r})$$`
+
+
+---
+
+#Project Description
+
+.mermaid.fshadow[
+    graph LR
+    A("Week #1<br/>Initialization") --> B
+    B("Week #2<br/>Project") --> C
+    C("Week #3<br/>Project") --> D
+    D("Week #4<br/>Project") --> E
+    E("Week #5<br/>Project") --> F("Week #6<br/>Presentation")
+    style A fill:#090
+    style B fill:#090
+    style C fill:#090
+    style D fill:#090
+    style E fill:#090
+    <!-- style F fill:#090 -->
+]
+
+
+.column.middle.grow[
+## Basis functions
+
+They are defined as
+`$$
+\psi_{m,n,n_z}(r_\perp, \theta, z)
+        \equiv
+    Z(z, n_z)
+    .
+    R(r_\perp, m, n)
+    .
+         e^{im\theta}
+$$`
+
+with
+
+`$$
+Z(z, n_z)
+\equiv
+\phi_{n_z}(z)
+=
+         \frac{1}{\sqrt{b_z}}
+         \frac{1}{\sqrt{2^{n_z} \sqrt{\pi}n_z!}}
+         e^{-\frac{z^2}{2b_z^2}}H_{n_z}\left(\frac{z}{b_z}\right)
+$$`
+
+and
+`$$
+R(r_\perp, m, n)
+         \equiv
+         \frac{1}{b_{\perp}\sqrt{\pi}}
+         \sqrt{\frac{n!}{(n+|m|)!}}
+         e^{-\frac{r_{\perp}^2}{2b_{\perp}^2}}
+         \left(\frac{r_{\perp}}{b_{\perp}}\right)^{|m|}
+         L_n^{|m|}\left(\frac{r_{\perp}^2}{b_{\perp}^2}\right).
+$$`
+
+Parameters: `\(b_\perp, b_z\)`.
+]
+
+
+---
+
+
+#Project description
+
+.column.middle.grow[
+## Basis truncation
+
+We define
+`$$
+n_z^\textrm{max}(i) \equiv (N+2).Q^\frac{2}{3}+\frac{1}{2}-i.Q
+$$`
+
+and
+`$$
+m^\textrm{max} \equiv \textrm{sup}\left\{i:n_z^\textrm{max}(i)\ge 1\right\}.
+$$`
+
+The quantum number values are the **integers** verifying
+`$$\begin{eqnarray}
+0 &\le m \lt& \textrm{mMax} \equiv m^\textrm{max}\\
+0 &\le n \lt& \textrm{nMax[m]} \equiv \frac{1}{2}(m^\textrm{max}-m-1) + 1\\
+0 &\le n_z \lt& \textrm{n_zMax[m, n]} \equiv n_z^\textrm{max}(m+2n+1).
+\end{eqnarray}$$`
+
+Parameters: `\(N, Q\)`.
+]
+---
+
+#Mandatory unit test
+
+## .hcenter[UnitTest.h]
+.column.middle.grow[
+```C++
+
+/* Mandatory test #00 - Hermite and Laguerre polynomials */
+void testMandatory00(void)
+{
+  Poly poly;
+  arma::vec zVals, calcVals, targetVals;
+  zVals = {-3.1, -2.3, -1.0, -0.3, 0.1, 4.3, 9.2, 13.7};
+  poly.calcHermite(6, zVals); // compute Hermite polynomials for n in {0 ... 5}
+  calcVals   = poly.hermite(4); // n = 4
+  targetVals = {  1.02835360e+03,  2.05825600e+02, -2.00000000e+01,  7.80960000e+00,
+                  1.15216000e+01,  4.59456160e+03,  1.10572154e+05,  5.54643458e+05};
+  TS_ASSERT_DELTA(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
+  calcVals   = poly.hermite(5); // n = 5
+  targetVals = { -4.76676832e+03, -3.88909760e+02,  8.00000000e+00, -3.17577600e+01,
+                  1.18403200e+01,  3.48375818e+04,  1.98557479e+06,  1.50339793e+07};
+  TS_ASSERT_DELTA(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
+  zVals = {0.1, 0.3, 1.2, 1.8, 2.0, 2.5, 7.1, 11.1};
+  poly.calcLaguerre(6, 4, zVals); // compute generalized Laguerre polynomials for m in {0 ... 5} and n in {0 ... 3}
+  calcVals   = poly.laguerre(4, 2); // m = 4, n = 2
+  targetVals = {  14.405,  13.245,  8.52 ,  5.82 ,  5.,  3.125,  -2.395,  10.005};
+  TS_ASSERT_DELTA(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
+  calcVals   = poly.laguerre(5, 3); // m = 5, n = 3
+  targetVals = { 53.23983333,  47.95550000,  27.87200000,  17.5880,
+                 14.66666667,   8.39583333,  -0.81183333,  10.1015};
+  TS_ASSERT_DELTA(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
+}
+```
+]
+
+## .hcenter[Shell session]
+```shell
+$ make test
+/Library/Developer/CommandLineTools/usr/bin/make -C src test
+g++ -std=c++11 -Wall -c Poly.cpp Basis.cpp Miscellaneous.cpp Density.cpp -larmadillo
+cxxtestgen --error-printer -o test.cpp PolyTest.h
+g++ -std=c++11 -Wall -o test  test.cpp Poly.o Basis.o Miscellaneous.o Density.o -larmadillo -llapack -lblas
+./test
+*Running cxxtest tests (4 tests)....OK!
+
+```
+
+---
+
+
+#Mandatory unit test
+
+## .hcenter[UnitTest.h]
+.column.middle.grow[
+```C++
+/* Mandatory test #01 - Basis truncation */
+void testMandatory01(void)
+{
+    //     br = 1.935801664793151, bz = 2.829683956491218, N = 14, Q = 1.3
+    Basis basis(1.935801664793151,      2.829683956491218,     14,     1.3);
+    TS_ASSERT_EQUALS(basis.mMax, 14);
+    arma::ivec nMax = {7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1};
+    TS_ASSERT(!arma::any(basis.nMax - nMax));
+    arma::imat n_zMax = {{18, 15, 13, 10, 7, 5, 2},
+        {16, 14, 11,  9, 6, 3, 1},
+        {15, 13, 10,  7, 5, 2, 0},
+        {14, 11,  9,  6, 3, 1, 0},
+        {13, 10,  7,  5, 2, 0, 0},
+        {11,  9,  6,  3, 1, 0, 0},
+        {10,  7,  5,  2, 0, 0, 0},
+        { 9,  6,  3,  1, 0, 0, 0},
+        { 7,  5,  2,  0, 0, 0, 0},
+        { 6,  3,  1,  0, 0, 0, 0},
+        { 5,  2,  0,  0, 0, 0, 0},
+        { 3,  1,  0,  0, 0, 0, 0},
+        { 2,  0,  0,  0, 0, 0, 0},
+        { 1,  0,  0,  0, 0, 0, 0}
+    };
+    TS_ASSERT(!arma::any(arma::any(basis.n_zMax - n_zMax)));
+}
+```
+]
+
+## .hcenter[Shell session]
+```shell
+$ make test
+/Library/Developer/CommandLineTools/usr/bin/make -C src test
+g++ -std=c++11 -Wall -c Poly.cpp Basis.cpp Miscellaneous.cpp Density.cpp -larmadillo
+cxxtestgen --error-printer -o test.cpp PolyTest.h
+g++ -std=c++11 -Wall -o test  test.cpp Poly.o Basis.o Miscellaneous.o Density.o -larmadillo -llapack -lblas
+./test
+*Running cxxtest tests (4 tests)....OK!
+
+```
+
+---
+
+#Mandatory unit test
+
+## .hcenter[UnitTest.h]
+.column.middle.grow[
+```C++
+/* Mandatory test #02 - Basis r-functions */
+void testMandatory02(void)
+{
+  // br = 1.935801664793151, bz = 2.829683956491218, N = 14, Q = 1.3
+  Basis basis(1.935801664793151,      2.829683956491218,     14,     1.3);
+  arma::vec r = {3.1, 2.3, 1.0, 0.0, 0.1, 4.3, 9.2, 13.7};
+  arma::vec res00 = { 8.08521235111303e-02,
+                      1.43887615825118e-01,
+                      2.55045100912706e-01,
+                      2.91450097294984e-01,
+                      2.91061479407116e-01,
+                      2.47240792330589e-02,
+                      3.63004153921473e-06,
+                      3.87659726026123e-12
+                    };
+  TS_ASSERT_DELTA(arma::norm(basis.rPart(r, 0, 0) - res00), 0.0, 1e-15);
+  arma::vec res82 = { 5.87858442372438e-02,
+                      1.35240488413384e-02,
+                      4.06810074575519e-05,
+                      0.00000000000000e+00,
+                      4.92817669085478e-13,
+                      8.52011998934850e-02,
+                      5.20525909328609e-02,
+                      1.44615166152252e-05
+                    };
+  TS_ASSERT_DELTA(arma::norm(basis.rPart(r, 8, 2) - res82), 0.0, 1e-15);
+}
+```
+]
+
+## .hcenter[Shell session]
+```shell
+$ make test
+/Library/Developer/CommandLineTools/usr/bin/make -C src test
+g++ -std=c++11 -Wall -c Poly.cpp Basis.cpp Miscellaneous.cpp Density.cpp -larmadillo
+cxxtestgen --error-printer -o test.cpp PolyTest.h
+g++ -std=c++11 -Wall -o test  test.cpp Poly.o Basis.o Miscellaneous.o Density.o -larmadillo -llapack -lblas
+./test
+*Running cxxtest tests (4 tests)....OK!
+
+```
+]
+
+---
+
+#Mandatory unit test
+
+## .hcenter[UnitTest.h]
+.column.middle.grow[
+```C++
+/*Mandatory test #03 - Basis z-functions */
+void testMandatory03(void)
+{         
+  //     br = 1.935801664793151, bz = 2.829683956491218, N = 14, Q = 1.3
+  Basis basis(1.935801664793151,      2.829683956491218,     14,     1.3);
+  arma::vec z = {-10.1, -8.4, -1.0, 0.0, 0.1, 4.3, 9.2, 13.7};
+  arma::vec res00 = { 7.64546544834383e-04,
+                      5.44886272162148e-03,
+                      4.19492564268520e-01,
+                      4.46522724110539e-01,
+                      4.46243982300708e-01,
+                      1.40736821086932e-01,
+                      2.26186220733178e-03,
+                      3.62929640195959e-06};
+  TS_ASSERT_DELTA(arma::norm(basis.zPart(z, 0) - res00), 0.0, 1e-15);
+  arma::vec res15 = {-9.48674551049192e-02,
+                     -1.40338701953237e-03,
+                      1.85620628040096e-01,
+                     -0.00000000000000e+00,
+                     -3.93028470685214e-02,
+                     -1.79526868763440e-01,
+                      2.15604096600475e-01,
+                      2.44977220882127e-01};
+  TS_ASSERT_DELTA(arma::norm(basis.zPart(z, 15) - res15), 0.0, 1e-15);
+}
+```
+]
+
+## .hcenter[Shell session]
+```shell
+$ make test
+/Library/Developer/CommandLineTools/usr/bin/make -C src test
+g++ -std=c++11 -Wall -c Poly.cpp Basis.cpp Miscellaneous.cpp Density.cpp -larmadillo
+cxxtestgen --error-printer -o test.cpp PolyTest.h
+g++ -std=c++11 -Wall -o test  test.cpp Poly.o Basis.o Miscellaneous.o Density.o -larmadillo -llapack -lblas
+./test
+*Running cxxtest tests (4 tests)....OK!
+
+```
+
+---
+
+# Nuclear local density Computation
+
+
+`$$\rho(\mathbf{r})\equiv \sum_a \sum_b \rho_{ab}\psi_a(\mathbf{r})\psi^*_b(\mathbf{r}) = \sum_{m_a}\sum_{n_a}\sum_{n_{za}}\sum_{m_b}\sum_{n_b}\sum_{n_{zb}}\rho_{m_a,n_a,n_{za},m_b,n_b,n_{zb}}\psi_{m_a,n_a,n_{za}}(\mathbf{r})\psi^*_{m_b,n_b,n_{zb}}(\mathbf{r})$$`
+
+.column.middle.grow[
+## Direct algorithm
+```C++
+int ia = 0;
+int ib = 0;
+arma::mat result = arma::zeros(rVals.n_rows, zVals.n_rows); // number of points on r- and z- axes
+for (int m = 0; m < basis.mMax; m++)
+{
+    for (int n = 0; n < basis.nMax(m); n++)
+    {
+        for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
+        {
+            for (int mp = 0; mp < basis.mMax; mp++)
+            {
+                for (int np = 0; np < basis.nMax(mp); np++)
+                {
+                    for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++)
+                    {
+                        arma::mat funcA = basis.basisFunc(m,  n,  n_z, zVals, rVals);
+                        arma::mat funcB = basis.basisFunc(mp, np, n_zp, zVals, rVals);
+                        result += funcA % funcB * rho(ia, ib);
+                        ib++;
+                    }
+                }
+            }
+            ib = 0;
+            ia++;
+        }            
+    }
+}
+```
+]
+
+.alert.hcenter[**52.855s**]
+
+---
+
+#Optimization of sum calculation - `\(\delta_{xy}\)`
+
+`$$\rho(\mathbf{r})\equiv \sum_a \sum_b \rho_{ab}\psi_a(\mathbf{r})\psi^*_b(\mathbf{r}) = \sum_{m_a}\sum_{n_a}\sum_{n_{za}}\color{magenta}{\sum_{m_b}}\sum_{n_b}\sum_{n_{zb}}\rho_{m_a,n_a,n_{za},m_b,n_b,n_{zb}}\psi_{m_a,n_a,n_{za}}(\mathbf{r})\psi^*_{m_b,n_b,n_{zb}}(\mathbf{r})$$`
+
+.row[
+.column.w48.middle[
+```C++
+//=== Version 0 ===
+int ia = 0;
+int ib = 0;
+arma::mat result = 
+arma::zeros(rVals.n_rows, zVals.n_rows);
+for (int m = 0; m < basis.mMax; m++)
+{
+  for (int n = 0; n < basis.nMax(m); n++)
+  {
+    for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
+    {
+      for (int mp = 0; mp < basis.mMax; mp++)
+      {
+        for (int np = 0; np < basis.nMax(mp); np++)
+        {
+          for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++)
+          {
+            arma::mat funcA = 
+            basis.basisFunc(m,n,n_z,zVals,rVals);
+            arma::mat funcB = 
+            basis.basisFunc(mp,np,n_zp,zVals,rVals);
+            result += funcA%funcB*rho(ia,ib);
+            ib++;
+          }
+        }
+      }
+      ib = 0;
+      ia++;
+    }            
+  }
+}
+```
+]
+.column.middle[
+:arrow_right:
+]
+.column.w48.middle[
+```C++
+//=== Version 1 ===
+int ia = 0;
+int ib = 0;
+arma::mat result = 
+arma::zeros(rVals.n_rows, zVals.n_rows);
+arma::imat sumN_zMax = arma::sum(basis.n_zMax, 1);
+for (int m = 0; m < basis.mMax; m++)
+{
+  for (int n = 0; n < basis.nMax(m); n++)
+  {
+    for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
+    {
+      for (int mp = 0; mp < basis.mMax; mp++)
+      {
+*       if (m != mp) { ib += sumN_zMax(mp); continue; }
+        for (int np = 0; np < basis.nMax(mp); np++)
+        {
+          for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++)
+          {
+            arma::mat funcA = basis.basisFunc(m,  n,  n_z, zVals, rVals);
+            arma::mat funcB = basis.basisFunc(mp, np, n_zp, zVals, rVals);
+            result += funcA % funcB * rho(ia, ib);
+            ib++;
+          }
+        }
+      }
+      ib = 0;
+      ia++;
+    }            
+  }
+}
+```
+]
+]
+
+.row[
+.column.w48.middle[
+.alert.hcenter[**52.855s**]
+]
+.column.w48.middle[
+.alert.hcenter[**5.9408s**]
+]
+]
+
+---
+
+#Optimization of sum calculation - Pre-calculate `\(\psi_{a}\)`
+
+`$$\rho(\mathbf{r})\equiv \sum_a \sum_b \rho_{ab}\psi_a(\mathbf{r})\psi^*_b(\mathbf{r}) = \sum_{m_a}\sum_{n_a}\sum_{n_{za}}\color{magenta}{\psi_{m_a,n_a,n_{za}}(\mathbf{r})}\sum_{m_b}\sum_{n_b}\sum_{n_{zb}}\rho_{m_a,n_a,n_{za},m_b,n_b,n_{zb}}\psi^*_{m_b,n_b,n_{zb}}(\mathbf{r})$$`
+
+
+.row[
+.column.w48.middle[
+```C++
+//=== Version 1 ===
+int ia = 0;
+int ib = 0;
+arma::mat result = 
+arma::zeros(rVals.n_rows, zVals.n_rows);
+arma::imat sumN_zMax = arma::sum(basis.n_zMax, 1);
+for (int m = 0; m < basis.mMax; m++)
+{
+  for (int n = 0; n < basis.nMax(m); n++)
+  {
+    for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
+    {
+      for (int mp = 0; mp < basis.mMax; mp++)
+      {
+        if (m != mp) { ib += sumN_zMax(mp); continue; }
+        for (int np = 0; np < basis.nMax(mp); np++)
+        {
+          for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++)
+          {
+            arma::mat funcA =
+            basis.basisFunc(m,n,n_z,zVals,rVals);
+            arma::mat funcB=
+            basis.basisFunc(mp,np,n_zp,zVals,rVals);
+            result += funcA % funcB * rho(ia, ib);
+            ib++;
+          }
+        }
+      }
+      ib = 0;
+      ia++;
+    }            
+  }
+}
+```
+]
+.column.middle[
+:arrow_right:
+]
+.column.w48.middle[
+```C++
+//=== Version 2 ===
+int ia = 0;
+int ib = 0;
+arma::mat result = arma::zeros(rVals.n_rows, zVals.n_rows); // number of points on r- and z- axes
+arma::imat sumN_zMax = arma::sum(basis.n_zMax, 1);
+for (int m = 0; m < basis.mMax; m++)
+{
+  for (int n = 0; n < basis.nMax(m); n++)
+  {
+    for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
+    {
+*     arma::mat funcA = 
+*     basis.basisFunc(m,n,n_z,zVals,rVals);
+      for (int mp = 0; mp < basis.mMax; mp++)
+      {
+        if (m != mp)
+        { ib += sumN_zMax(mp); continue; }
+        for (int np = 0; np < basis.nMax(mp); np++)
+        {
+          for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++)
+          {                            
+            arma::mat funcB = 
+            basis.basisFunc(mp,np,n_zp,zVals,rVals);
+            result += funcA % funcB * rho(ia, ib);
+            ib++;
+          }
+        }
+      }
+      ib = 0;
+      ia++;
+    }            
+  }
+}
+```
+]
+]
+
+.row[
+.column.w48.middle[
+.alert.hcenter[**5.9408s**]
+]
+.column.w48.middle[
+.alert.hcenter[**4.22893s**]
+]
+]
+
+---
+
+#Optimization of sum calculation - Separating Rpart & Zpart
+
+
+
+`$$\rho(\mathbf{r})\equiv \sum_a \sum_b \rho_{ab}\psi_a(\mathbf{r})\psi^*_b(\mathbf{r}) = \sum_{m_a}\sum_{n_a}\sum_{n_{za}}\color{magenta}{\psi_{m_a,n_a,n_{za}}(\mathbf{r})}\sum_{m_b}\sum_{n_b}\sum_{n_{zb}}\rho_{m_a,n_a,n_{za},m_b,n_b,n_{zb}}\color{magenta}{\psi^*_{m_b,n_b,n_{zb}}(\mathbf{r})}$$`
+
+
+.row[
+.column.w48.middle[
+```C++
+//=== Version 2 ===
+int ia = 0;
+int ib = 0;
+arma::mat result = arma::zeros(rVals.n_rows, zVals.n_rows); // number of points on r- and z- axes
+arma::imat sumN_zMax = arma::sum(basis.n_zMax, 1);
+for (int m = 0; m < basis.mMax; m++)
+{
+  for (int n = 0; n < basis.nMax(m); n++)
+  {
+    for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
+    {
+      arma::mat funcA = 
+      basis.basisFunc(m,n,n_z,zVals,rVals);
+      for (int mp = 0; mp < basis.mMax; mp++)
+      {
+        if (m != mp)
+        { ib += sumN_zMax(mp); continue; }
+        for (int np = 0; np < basis.nMax(mp); np++)
+        {
+          for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++)
+          {                            
+            arma::mat funcB = 
+            basis.basisFunc(mp,np,n_zp,zVals,rVals);
+            result += funcA % funcB * rho(ia, ib);
+            ib++;
+          }
+        }
+      }
+      ib = 0;
+      ia++;
+    }            
+  }
+}
+```
+]
+.column.middle[
+:arrow_right:
+]
+.column.w48.middle[
+```C++
+//=== Version 3 ===
+int ia = 0;
+int ib = 0;
+arma::mat result = arma::zeros(rVals.n_rows, zVals.n_rows);
+arma::imat sumN_zMax = arma::sum(basis.n_zMax, 1);
+for (int m = 0; m < basis.mMax; m++)
+{
+  for (int n = 0; n < basis.nMax(m); n++)
+  {
+*   arma::vec rPartA = basis.rPart(rVals, m, n);
+    for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
+    {
+      arma::vec zPartA = basis.zPart(zVals, n_z);
+      arma::mat funcA = rPartA * zPartA.t();
+      for (int mp = 0; mp < basis.mMax; mp++)
+      {
+        if (m != mp)
+        { ib += sumN_zMax(mp); continue;}
+        for (int np = 0; np < basis.nMax(mp); np++)
+        {
+*         arma::vec rPartB=basis.rPart(rVals,mp,np);
+          for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++)
+          {
+            arma::vec zPartB=basis.zPart(zVals,n_zp);
+            arma::mat funcB = rPartB * zPartB.t();
+            result += funcA % funcB * rho(ia, ib);
+            ib++;
+          }
+        }
+      }
+      ib = 0;
+      ia++;
+}}}
+```
+]
+]
+
+.row[
+.column.w48.middle[
+.alert.hcenter[**4.22893s**]
+]
+.column.w48.middle[
+.alert.hcenter[**3.29224s**]
+]
+]
+
+
+---
+
+#Optimization of sum calculation - Symetry
+.column.middle.grow[
+<br />
+```C++
+//=== Version 4 ===
+int ia = 0;
+int ib = 0;
+arma::mat result = arma::zeros(rVals.n_rows, zVals.n_rows); // number of points on r- and z- axes
+arma::imat sumN_zMax = arma::sum(basis.n_zMax, 1);
+arma::mat sum = arma::zeros(rVals.n_rows, zVals.n_rows);
+for (int m = 0; m < basis.mMax; m++)
+{
+  for (int n = 0; n < basis.nMax(m); n++)
+  {
+    arma::vec rPartA = basis.rPart(rVals, m, n);
+    for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
+    {
+      arma::vec zPartA = basis.zPart(zVals, n_z);
+      arma::mat funcA = rPartA * zPartA.t();
+      sum = arma::zeros(rVals.n_rows, zVals.n_rows);
+      for (int mp = 0; mp < basis.mMax; mp++)
+      {
+        if (m != mp)
+        { ib += sumN_zMax(mp); continue; }
+        for (int np = 0; np < basis.nMax(mp); np++)
+        {
+          arma::vec rPartB = basis.rPart(rVals, mp, np);
+          for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++)
+          {                          
+            arma::vec zPartB = basis.zPart(zVals, n_zp);
+            arma::mat funcB = rPartB * zPartB.t();
+            if (n_z > n_zp)
+            { sum += 2 * funcB * rho(ia,ib); }
+            else if (n_z == n_zp)
+            { sum += funcB * rho(ia,ib); }
+            ib++;
+          }
+        }
+      }
+      result += funcA % sum;
+      ib = 0;
+      ia++;
+}}}```
+]
+
+.alert.hcenter[**1.93488s**]
+---
+
+#Optimization of sum calculation - Remove the mb loop
+.column.middle.grow[
+<br />
+```C++
+//=== Version 5 ===
+int ia = 0;
+int ib = 0;
+int old_ib=0;
+arma::mat result = arma::zeros(rVals.n_rows, zVals.n_rows); // number of points on r- and z- axes
+arma::imat sumN_zMax = arma::sum(basis.n_zMax, 1);
+arma::mat sum = arma::zeros(rVals.n_rows, zVals.n_rows);
+
+for (int m = 0; m < basis.mMax; m++)
+{
+  for (int n = 0; n < basis.nMax(m); n++)
+  {
+    arma::vec rPartA = basis.rPart(rVals, m, n);
+    for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
+    {
+      arma::vec zPartA = basis.zPart(zVals, n_z);
+      arma::mat funcA = rPartA * zPartA.t();
+      sum = arma::zeros(rVals.n_rows, zVals.n_rows);
+      ib = old_ib;
+      for (int np = 0; np < basis.nMax(m); np++)
+      {
+        arma::vec rPartB = basis.rPart(rVals, m, np);
+        for (int n_zp = 0; n_zp < basis.n_zMax(m, np); n_zp++)
+        {                          
+          arma::vec zPartB = basis.zPart(zVals, n_zp);
+          arma::mat funcB = rPartB * zPartB.t();
+          if (n_z > n_zp)
+          { sum += 2 * funcB * rho(ia,ib); }
+          else if (n_z == n_zp)
+          { sum += funcB * rho(ia,ib); }
+          ib++;
+        }
+      }
+      result += funcA % sum;
+      ia++;
+    }}
+  old_ib=ia;
+}
+```
+]
+
+.alert.hcenter[**1.84128s**]
+
+---
+
+# 2D Local Nuclear Density in the (x,z) plane
+
+.hcenter[
+.vcenter[
+ ![](images/2Dlnd.png)
+]]
+
+---
+
+# 3D Local Nuclear Density in the (x,y, z) space
+
+.hcenter[
+.vcenter[
+ ![](images/visu.png)
+]]
+
+
+    </textarea>
+
+    <script src="core/javascript/remark.js"></script>
+    <script src="core/javascript/plotly.js" type="text/javascript"></script>
+    <script src="core/javascript/MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntil=configured" type="text/javascript"></script>
+    <script src="core/javascript/emojify.js" type="text/javascript"></script>
+    <script src="core/javascript/mermaid.js" type="text/javascript"></script>
+    <script src="core/javascript/term.js" type="text/javascript"></script>
+    <script src="core/javascript/jquery-2.1.1.min.js" type="text/javascript"></script>
+    <script src="core/javascript/extend-jquery.js" type="text/javascript"></script>
+    <script src="core/javascript/cinescript.js" type="text/javascript"></script>
+    <script src="core/javascript/gitgraph.js" type="text/javascript"></script>
+    <script>
+
+    // === Remark.js initialization ===
+    var slideshow = remark.create({
+      highlightStyle: 'monokai',
+      countIncrementalSlides: false,
+      highlightLines: true,
+      highlightInLineCode: false
+    });
+
+    // === Mermaid.js initialization ===
+    mermaid.initialize({
+      startOnLoad: false,
+      cloneCssStyles: false,
+      flowchart:{
+        height: 50
+      },
+      sequenceDiagram:{
+        width: 110,
+        height: 30
+      }
+    });
+
+    function initMermaid(s) {
+      var diagrams = document.querySelectorAll('.mermaid');
+      var i;
+      for(i=0;i<diagrams.length;i++){
+        if(diagrams[i].offsetWidth>0){
+          mermaid.init(undefined, diagrams[i]);
+        }
+      }
+    }
+
+    slideshow.on('afterShowSlide', initMermaid);
+    initMermaid(slideshow.getSlides()[slideshow.getCurrentSlideIndex()]);
+
+    // === MathJax.js initialization ===
+    MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'] } }); 
+    MathJax.Hub.Queue(function() { $(MathJax.Hub.getAllJax()).map(function(index, elem) { return(elem.SourceElement()); }).parent().addClass('has-jax'); });
+    MathJax.Hub.Configured();
+
+    // === Emojify.js initialization ===
+    emojify.run();
+
+    // === Cinescript initialization ===
+    $(document).ready(init_cinescripts);
+
+    // ===== END =====
+  
+
+    </script>
+  </body>
+</html>

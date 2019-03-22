@@ -1,0 +1,19 @@
+---
+title: "IPS02"
+author: "Sneiba"
+date: "12/15/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+DATA_DIR = system.file("~/Desktop/Work/IPS/projetIPS01/out/")
+df = read.csv("~/Desktop/Work/IPS/projetIPS01/out/result.csv")
+names(df) = c("rVals", "zVals", "density")
+
+ggplot(df, aes(rVals, zVals)) + geom_raster(aes(fill=density)) + scale_fill_gradientn(colours = terrain.colors(4)) + labs(x="x (from -10 fm to 10 fm)", y="z (from -10 fm to 10 fm)") + labs(title = "Nuclear Density for theta = 0")
+```
